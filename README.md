@@ -6,4 +6,8 @@ The "search" function of this script provides a unified method for finding packa
 
 The "installed" function of this script provides a unified method for finding installed packages from both repositories and snaps.
 
-  USAGE: uni_okg_util.py search|installed package_name 
+```
+
+USAGE: uni_pkg_util.py search|installed package_name 
+
+```
