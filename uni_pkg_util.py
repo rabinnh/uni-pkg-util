@@ -42,7 +42,7 @@ class UniPackage:
                 continue
             self.snapList.append([cols[0].strip(), cols[1].strip()])
 
-    # For apt, it's a two step process
+    # For apt, it's a two-step process
     def getAptVersion(self, raw, package):
         unique = set()
         for entry in raw:
@@ -88,7 +88,11 @@ class UniPackage:
 
     # Search for installed packages
     def installedPackages(self, package):
-        snapSearch = subprocess.check_output(['snap', 'list', package]).decode("utf-8").split('\n')
+        try:
+            snapSearch = subprocess.check_output(['snap', 'list', package], stderr=subprocess.DEVNULL).decode("utf-8").split('\n')
+        except subprocess.CalledProcessError:
+            snapSearch = ['Name     Version    Rev   Tracking       Publisher  Notes']
+            pass
         aptSearch = subprocess.check_output(['aptitude', '-q', '-F', '"%?p=%?V"', 'search', package]).decode("utf-8").split('\n')
         self.normalizeSnapSearch(snapSearch, package)
         self.normalizeAptInstalled(aptSearch, package)
@@ -118,8 +122,16 @@ if __name__ == '__main__':
         uniCommand.installedPackages(sys.argv[2])
         print('--- Installed Snap Packages ---')
         headers = ['Package Name', 'Version']
-        table = columnar(uniCommand.snapList, headers, no_borders=True)
-        print(table)
+        if len(uniCommand.snapList) == 0:
+            print('\n')
+            print('\tNo snaps installed')
+        else:
+            table = columnar(uniCommand.snapList, headers, no_borders=True)
+            print(table)
         print('\n--- Installed Repo Packages ---')
-        table = columnar(uniCommand.aptList, headers, no_borders=True)
-        print(table)
+        if len(uniCommand.aptList) == 0:
+            print(headers)
+            print('No debs installed')
+        else:
+            table = columnar(uniCommand.aptList, headers, no_borders=True)
+            print(table)
